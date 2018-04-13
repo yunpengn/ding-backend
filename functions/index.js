@@ -21,11 +21,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-// The reference to the node under "orders".
-const orderRef = functions.database.ref('/orders');
-
 // Triggers whenever there is any change to the "orders" node and its sub-nodes.
-exports.orderChange = orderChange.onWrite((change) => {
+exports.orderChange = functions.database.ref('/orders').onWrite((change) => {
 	// Increments or decrements according to whether the order is inserted or deleted.
 	let increment;
 	if (change.after.exists() && !change.before.exists()) {
@@ -35,6 +32,6 @@ exports.orderChange = orderChange.onWrite((change) => {
 	} else {
 		return null;
 	}
-	
-	return console.log('Counter updated.');
+
+	return null;
 });
