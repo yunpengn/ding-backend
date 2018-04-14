@@ -26,7 +26,9 @@ exports.orderChange = functions.database.ref('/orders').onWrite((change) => {
 	// Gets the stallId from this changed order.
 	let stallId = change.after.child('stallId').val();
 	// Thus gets the reference to the stall's "number of people waiting" counter.
-	let stallCounter = functions.database.ref('/stall_overviews/' + stallId + "/queueCount");
+	let stallCounter = admin.database().ref('stall_overviews/' + stallId + '/queueCount');
+
+	console.log('Change for stall with id ' + stallId);
 
 	// Increments or decrements according to whether the order is inserted or deleted.
 	let increment;
@@ -38,6 +40,7 @@ exports.orderChange = functions.database.ref('/orders').onWrite((change) => {
 		// Only changes counter when there is a new order inserted or an old order deleted.
 		return null;
 	}
+	console.log('Change for stall with id ' + stallId + ' is ' + increment + ".");
 	
 	// Uses a promise so that our function waits for this async event to complete before it exits.
 	return stallCounter.transaction((current) => {
