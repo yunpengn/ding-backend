@@ -20,6 +20,14 @@ npm install -g firebase-tools
 - To test functions triggered by HTTP/HTTPS, use `firebase serve`.
 	- If not working, try to run with admin mode by `sudo firebase serve`.
 
+## Feature Description
+
+#### Firebase Cloud Function `orderChange`
+
+This function is trigger whenever there is change to any direct child node of the `orders/` node.
+- If there is a new order inserted, it will increment the corresponding `stall_overview` node by 1; 
+- if there is an existing order deleted (usually because of being moved to `order_history/`),  decrement by 1.
+
 ## Licence
 
 [GNU General Public Licence 3.0](LICENSE)
