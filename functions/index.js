@@ -23,6 +23,11 @@ admin.initializeApp();
 
 // Triggers whenever there is any change to the "orders" node and its sub-nodes.
 exports.orderChange = functions.database.ref('/orders').onWrite((change) => {
+	// Gets the stallId from this changed order.
+	let stallId = change.after.child('stallId').val();
+	// Thus gets the reference to the stall's "number of people waiting" counter.
+	let stallCounter = functions.database.ref('/stall_overviews/' + stallId + "/queueCount");
+
 	// Increments or decrements according to whether the order is inserted or deleted.
 	let increment;
 	if (change.after.exists() && !change.before.exists()) {
@@ -30,8 +35,14 @@ exports.orderChange = functions.database.ref('/orders').onWrite((change) => {
 	} else if (!change.after.exists() && change.before.exists()) {
 		increment = -1;
 	} else {
+		// Only changes counter when there is a new order inserted or an old order deleted.
 		return null;
 	}
-
-	return null;
+	
+	// Uses a promise so that our function waits for this async event to complete before it exits.
+	return stallCounter.transaction((current) => {
+		return (current || 0) + increment;
+	}).then(() => {
+		return console.log('Counter for stall with id ' + stallId + ' updated.');
+	});
 });

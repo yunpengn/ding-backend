@@ -1,6 +1,6 @@
 {
-  "name": "functions",
-  "description": "Cloud Functions for Firebase",
+  "name": "order-counter",
+  "description": "An order counter for Ding! App using Firebase Cloud Functions.",
   "scripts": {
     "lint": "eslint .",
     "serve": "firebase serve --only functions",
