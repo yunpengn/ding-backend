@@ -22,21 +22,21 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 // Triggers whenever there is any change to the "orders" node and its sub-nodes.
-exports.orderChange = functions.database.ref('/orders/{orderId}').onWrite((change) => {
-	// Gets the stallId & orderId from this changed order.
+exports.orderChange = functions.database.ref('/orders/{orderId}').onWrite((event) => {
+	// Gets the stallId & orderId from this event (the changed order).
 	let stallId;
 	let orderId;
 
 	// Increments or decrements according to whether the order is inserted or deleted.
-	let increment;
-	if (change.after.exists() && !change.before.exists()) {
-		increment = 1;
-		stallId = change.after.child('stallId').val();
-		orderId = change.after.key;
-	} else if (!change.after.exists() && change.before.exists()) {
-		increment = -1;
-		stallId = change.before.child('stallId').val();
-		orderId = change.before.key;
+	let change;
+	if (event.after.exists() && !event.before.exists()) {
+		change = 1;
+		stallId = event.after.child('stallId').val();
+		orderId = event.after.key;
+	} else if (!event.after.exists() && event.before.exists()) {
+		change = -1;
+		stallId = event.before.child('stallId').val();
+		orderId = event.before.key;
 	} else {
 		// Only changes counter when there is a new order inserted or an old order deleted.
 		return null;
@@ -47,11 +47,30 @@ exports.orderChange = functions.database.ref('/orders/{orderId}').onWrite((chang
 	
 	// Uses a promise so that our function waits for this async event to complete before it exits.
 	return stallCounter.transaction((current) => {
-		return (current || 0) + increment;
+		return (current || 0) + change;
 	}).then(() => {
-		return console.log('Counter for stall with id ' + stallId + ' updated by ' + increment 
+		return console.log('Counter for stall with id ' + stallId + ' updated by ' + change 
 			+ ' due to order ' + orderId + '.');
 	});
 });
 
-exports.averageRating = 
+// Triggers when there is any change to the "review" node under the corresponding "order history" node.
+exports.averageRating = functions.database.ref('/orders/{orderId}/review').onWrite((event) => {
+	// Gets the stallId from this event (the changed review) in the corresponding changed order history.
+	let stallId;
+
+	// Changes the amount of rating sum according to whether the review is inserted, edited or deleted.
+	let change;
+	if (event.after.exists() && !event.before.exists()) {
+		// Increases if there is a new review inserted.
+		change = event.after.child('rating').val();
+	} else if (!event.after.exists() && event.before.exists()) {
+		// Decreases if there is an old review deleted.
+		change = -event.before.child('rating').val();
+	} else {
+		// Extracts the difference if there is an old review edited.
+		change = event.after.child('rating').val() - event.before.child('rating').val();
+	}
+
+	return null;
+});
