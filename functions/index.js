@@ -82,30 +82,38 @@ exports.averageRating = functions.database.ref('/order_history/{orderId}/review'
 		counterChange = 0;
 	}
 
-	// Gets the reference to the corresponding "stall overview" node.
+	// Gets the reference to the corresponding "stall overview" node and applies change to it.
 	let stallOverview = admin.database().ref('stall_overviews/' + stallId);
+	return stallOverview.once('value').then((snapshot) => {
+		applyTransaction(stallOverview, stallId, counterChange, change, snapshot);
+		return undefined;
+	});
+});
 
-	return stallOverview.transaction((current) => {
+function applyTransaction(ref, stallId, counterChange, ratingChange, snapshot) {
+	return ref.transaction((current) => {
 		// Firebase transaction uses something like semaphore to ensure isolation. However, this may
-		// result in a null current value. We need to abort the transaction if so.
+		// result in a null current value.
 		if (current === null) {
-			return undefined;
+			current = snapshot.val();
 		}
 
-		current.reviewCount += counterChange;
-		if (current.reviewCount > 0) {
+		if (current.reviewCount + counterChange > 0) {
 			// Do not worry, Node.js does not have the problem of integer division.
-			current.averageRating += (change / current.reviewCount);
+			current.averageRating = (current.averageRating * current.reviewCount + ratingChange) 
+								  / (current.reviewCount + counterChange);
 		} else {
 			current.averageRating = 0;
 		}
+		current.reviewCount += counterChange;
 		return current;
-	}, function (error, committed, snapshot) => {
-		if (!committed) {
-			console.debug("The transaction is not committed.");
-			console.print(snapshot);
+	}, (error, committed, snapshot) => {
+		if (error) {
+			console.log("Some error occurs when trying to update average rating.");
+		} else if (!committed) {
+			console.log("The transaction is not committed. Tries to apply the transaction again.");
+		} else {
+			console.log('Average rating for ' + stallId + ' is updated due to a rating changed by ' + change + '.');
 		}
-	}).then(() => {
-		return console.log('Average rating for ' + stallId + ' is updated due to a rating changed by ' + change + '.');
 	});
-});
+}
