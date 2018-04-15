@@ -26,9 +26,14 @@ npm install -g firebase-tools
 
 #### Firebase Cloud Function `orderChange`
 
-This function is trigger whenever there is change to any direct child node of the `orders/` node.
+This function is triggered whenever there is change to any direct child node of the `orders/` node.
 - If there is a new order inserted, it will increment the corresponding `stall_overview` node by 1; 
 - if there is an existing order deleted (usually because of being moved to `order_history/`),  decrement by 1.
+
+#### Firebase Cloud Function `averageRating`
+
+This function is triggered whenever there is any change to the `review` node of the `order_history`'s direct child node.
+- If so, it will update the corresponding stall's `stall_overview` node's `averageRating` attribute. To achieve this, an extra `reviewCount` attribute is stored under `stall_overview`.
 
 ## Licence
 
