@@ -53,3 +53,5 @@ exports.orderChange = functions.database.ref('/orders/{orderId}').onWrite((chang
 			+ ' due to order ' + orderId + '.');
 	});
 });
+
+exports.averageRating = 

@@ -1,6 +1,8 @@
 # Ding! Back-end
 
-Some back-end codes for Ding! and Ding! Stall iOS applications
+Some back-end codes written in Node.js (Firebase Cloud Functions) for Ding! and Ding! Stall iOS applications.
+
+**[Ding! & Ding! Stall](http://isteps.comp.nus.edu.sg/event/12th-steps/module/CS3217/project/3) is participating in [12th STePS](http://isteps.comp.nus.edu.sg/event/12th-steps), a project showcase at [School of Computing](https://www.comp.nus.edu.sg), the [National University of Singapore](http://www.nus.edu.sg).<br>**
 
 ## How to setup the project
 
