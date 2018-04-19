@@ -113,7 +113,7 @@ function applyTransaction(ref, stallId, counterChange, ratingChange, snapshot) {
 		} else if (!committed) {
 			console.log("The transaction is not committed. Tries to apply the transaction again.");
 		} else {
-			console.log('Average rating for ' + stallId + ' is updated due to a rating changed by ' + change + '.');
+			console.log('Average rating for ' + stallId + ' is updated due to a rating changed by ' + ratingChange + '.');
 		}
 	});
 }
